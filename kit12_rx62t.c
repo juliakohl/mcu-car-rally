@@ -17,6 +17,7 @@ This program supports the following boards:
 /* Include                              */
 /*======================================*/
 #include "iodefine.h"
+#include "uart.h"
 
 /*======================================*/
 /* Symbol definitions                   */
@@ -70,6 +71,10 @@ void main(void)
 {
     /* Initialize MCU functions */
     init();
+
+    /* Initialize UART */
+        init_uart();
+        SCI2_Asyn_initial();
 
     /* Initialize micom car state */
     handle( 0 );
@@ -139,17 +144,21 @@ void main(void)
         case 11:
             /* Normal trace */
             if( check_crossline() ) {   /* Cross line check            */
-                pattern = 21;
+            	uart_str("Check Crossline.");
+            	pattern = 21;
                 break;
             }
             if( check_rightline() ) {   /* Right half line detection check */
-                pattern = 51;
+            	uart_str("Check rightline.");
+            	pattern = 51;
                 break;
             }
             if( check_leftline() ) {    /* Left half line detection check */
-                pattern = 61;
+            	uart_str("Check leftline.");
+            	pattern = 61;
                 break;
             }
+
             switch( sensor_inp(MASK3_3) ) {
                 case 0x00:
                     /* Center -> straight */
@@ -165,21 +174,23 @@ void main(void)
 
                 case 0x06:
                     /* Small amount left of center -> small turn to right */
-                    handle( 10 );
-                    motor( 100 ,84 );
+                    handle( 15 );
+                    motor( 100 ,76 );
                     break;
 
                 case 0x07:
                     /* Medium amount left of center -> medium turn to right */
-                    handle( 16 );
-                    motor( 75 ,56 );
+                    handle( 25 );
+                    motor( 45 ,28 );
+                    uart_str("medium amount left of center.");
                     break;
 
                 case 0x03:
                     /* Large amount left of center -> large turn to right */
-                    handle( 20 );
-                    motor( 50 ,35 );
+                    handle( 30 );
+                    motor( 40 ,22 );
                     pattern = 12;
+                    uart_str("large amount left of center.");
                     break;
 
                 case 0x20:
@@ -190,21 +201,23 @@ void main(void)
 
                 case 0x60:
                     /* Small amount right of center -> small turn to left */
-                    handle( -10 );
-                    motor( 84 ,100 );
+                    handle( -15 );
+                    motor( 76 ,100 );
                     break;
 
                 case 0xe0:
                     /* Medium amount right of center -> medium turn to left */
-                    handle( -16 );
-                    motor( 56 ,75 );
+                    handle( -25 );
+                    motor( 28 ,45 );
+                    uart_str("medium amount right of center.");
                     break;
 
                 case 0xc0:
                     /* Large amount right of center -> large turn to left */
-                    handle( -20 );
-                    motor( 35 ,50 );
+                    handle( -30 );
+                    motor( 22 ,40 );
                     pattern = 13;
+                    uart_str("large amount right of center.");
                     break;
 
                 default:
@@ -213,25 +226,32 @@ void main(void)
             break;
 
         case 12:
+        	uart_str("12.");
             /* Check end of large turn to right */
             if( check_crossline() ) {   /* Cross line check during large turn */
                 pattern = 21;
+                uart_str("Check Crossline.");
                 break;
             }
             if( check_rightline() ) {   /* Right half line detection check */
                 pattern = 51;
+                uart_str("Check rightline.");
                 break;
             }
             if( check_leftline() ) {    /* Left half line detection check */
                 pattern = 61;
+                uart_str("Check Leftline.");
                 break;
             }
             if( sensor_inp(MASK3_3) == 0x06 ) {
+            	uart_str("from12to11.");
                 pattern = 11;
+
             }
             break;
 
         case 13:
+        	uart_str("Case 13.");
             /* Check end of large turn to left */
             if( check_crossline() ) {   /* Cross line check during large turn */
                 pattern = 21;
@@ -246,11 +266,13 @@ void main(void)
                 break;
             }
             if( sensor_inp(MASK3_3) == 0x60 ) {
+            	uart_str("from13to11.");
                 pattern = 11;
             }
             break;
 
         case 21:
+        	uart_str("Case 21.");
             /* Processing at 1st cross line */
             led_out( 0x3 );
             handle( 0 );
@@ -260,6 +282,7 @@ void main(void)
             break;
 
         case 22:
+        	uart_str("22.");
             /* Read but ignore 2nd line */
             if( cnt1 > 100 ){
                 pattern = 23;
@@ -268,13 +291,15 @@ void main(void)
             break;
 
         case 23:
+        	uart_str("23.");
             /* Trace, crank detection after cross line */
             if( sensor_inp(MASK4_4)==0xf8 ) {
                 /* Left crank determined -> to left crank clearing processing */
                 led_out( 0x1 );
-                handle( -38 );
-                motor( 10 ,50 );
+                handle( -45 );
+                motor( 17 ,50 );
                 pattern = 31;
+                uart_str("leftTo31.");
                 cnt1 = 0;
                 break;
             }
@@ -284,14 +309,16 @@ void main(void)
                 handle( 38 );
                 motor( 50 ,10 );
                 pattern = 41;
+                uart_str("rightTo41.");
                 cnt1 = 0;
                 break;
             }
             switch( sensor_inp(MASK3_3) ) {
                 case 0x00:
                     /* Center -> straight */
+                	uart_str("goStraight0x00.");
                     handle( 0 );
-                    motor( 40 ,40 );
+                    motor( 10 ,10 );
                     break;
                 case 0x04:
                 case 0x06:
@@ -299,7 +326,7 @@ void main(void)
                 case 0x03:
                     /* Left of center -> turn to right */
                     handle( 8 );
-                    motor( 40 ,35 );
+                    motor( 10 ,9 );
                     break;
                 case 0x20:
                 case 0x60:
@@ -307,7 +334,7 @@ void main(void)
                 case 0xc0:
                     /* Right of center -> turn to left */
                     handle( -8 );
-                    motor( 35 ,40 );
+                    motor( 9 ,10 );
                     break;
             }
             break;
@@ -347,6 +374,7 @@ void main(void)
             break;
 
         case 51:
+        	uart_str("Case 51.");
             /* Processing at 1st right half line detection */
             led_out( 0x2 );
             handle( 0 );
@@ -409,6 +437,7 @@ void main(void)
             break;
 
         case 61:
+        	uart_str("Case 61.");
             /* Processing at 1st left half line detection */
             led_out( 0x1 );
             handle( 0 );
@@ -418,18 +447,20 @@ void main(void)
             break;
 
         case 62:
+        	uart_str("Case 62.");
             /* Read but ignore 2nd time */
-            if( cnt1 > 100 ){
+            if( cnt1 > 80 ){
                 pattern = 63;
                 cnt1 = 0;
             }
             break;
 
         case 63:
+        	uart_str("Case 63.");
             /* Trace, lane change after left half line detection */
             if( sensor_inp(MASK4_4) == 0x00 ) {
                 handle( -15 );
-                motor( 31 ,40 );
+                motor( 46 ,60 );
                 pattern = 64;
                 cnt1 = 0;
                 break;
@@ -437,23 +468,23 @@ void main(void)
             switch( sensor_inp(MASK3_3) ) {
                 case 0x00:
                     /* Center -> straight */
-                    handle( 0 );
-                    motor( 40 ,40 );
+                    handle( -10 );
+                    motor( 31 ,40 );
                     break;
                 case 0x04:
                 case 0x06:
                 case 0x07:
                 case 0x03:
                     /* Left of center -> turn to right */
-                    handle( 8 );
-                    motor( 40 ,35 );
+                    handle( -10 );
+                    motor( 31 ,40 );
                     break;
                 case 0x20:
                 case 0x60:
                 case 0xe0:
                 case 0xc0:
                     /* Right of center -> turn to left */
-                    handle( -8 );
+                    handle( -10 );
                     motor( 35 ,40 );
                     break;
                 default:
@@ -772,3 +803,4 @@ void handle( int angle )
 /***********************************************************************/
 /* end of file                                                         */
 /***********************************************************************/
+
