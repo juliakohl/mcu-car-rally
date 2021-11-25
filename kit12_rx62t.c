@@ -144,17 +144,17 @@ void main(void)
         case 11:
             /* Normal trace */
             if( check_crossline() ) {   /* Cross line check            */
-            	uart_str("Check Crossline.");
+            	uart_str("Crossline.");
             	pattern = 21;
                 break;
             }
             if( check_rightline() ) {   /* Right half line detection check */
-            	uart_str("Check rightline.");
+            	uart_str("rightline.");
             	pattern = 51;
                 break;
             }
             if( check_leftline() ) {    /* Left half line detection check */
-            	uart_str("Check leftline.");
+            	uart_str("leftline.");
             	pattern = 61;
                 break;
             }
@@ -189,7 +189,8 @@ void main(void)
                     /* Large amount left of center -> large turn to right */
                     handle( 30 );
                     motor( 40 ,22 );
-                    pattern = 12;
+
+                    //pattern = 12;
                     uart_str("large amount left of center.");
                     break;
 
@@ -216,7 +217,7 @@ void main(void)
                     /* Large amount right of center -> large turn to left */
                     handle( -30 );
                     motor( 22 ,40 );
-                    pattern = 13;
+                    //pattern = 13;
                     uart_str("large amount right of center.");
                     break;
 
@@ -225,22 +226,22 @@ void main(void)
             }
             break;
 
-        case 12:
+        case 12: //evtl. case 12 und 13 raus nehmen
         	uart_str("12.");
             /* Check end of large turn to right */
             if( check_crossline() ) {   /* Cross line check during large turn */
                 pattern = 21;
-                uart_str("Check Crossline.");
+                uart_str("Crossline.");
                 break;
             }
             if( check_rightline() ) {   /* Right half line detection check */
                 pattern = 51;
-                uart_str("Check rightline.");
+                uart_str("rightline.");
                 break;
             }
             if( check_leftline() ) {    /* Left half line detection check */
                 pattern = 61;
-                uart_str("Check Leftline.");
+                uart_str("Leftline.");
                 break;
             }
             if( sensor_inp(MASK3_3) == 0x06 ) {
@@ -250,7 +251,7 @@ void main(void)
             }
             break;
 
-        case 13:
+        case 13: //evtl. case 12 und 13 raus nehmen
         	uart_str("Case 13.");
             /* Check end of large turn to left */
             if( check_crossline() ) {   /* Cross line check during large turn */
@@ -271,7 +272,8 @@ void main(void)
             }
             break;
 
-        case 21:
+        case 21: // Problem: switcht in case 13 -> erkennt crossline manchmal nicht
+        	//UPDATE 25.11. case13 auskommentiert
         	uart_str("Case 21.");
             /* Processing at 1st cross line */
             led_out( 0x3 );
@@ -284,7 +286,7 @@ void main(void)
         case 22:
         	uart_str("22.");
             /* Read but ignore 2nd line */
-            if( cnt1 > 100 ){
+            if( cnt1 > 50 ){ // UPDATE 25.22. timer kürzer
                 pattern = 23;
                 cnt1 = 0;
             }
@@ -297,7 +299,7 @@ void main(void)
                 /* Left crank determined -> to left crank clearing processing */
                 led_out( 0x1 );
                 handle( -45 );
-                motor( 17 ,50 );
+                motor( 7 ,45 );
                 pattern = 31;
                 uart_str("leftTo31.");
                 cnt1 = 0;
@@ -306,8 +308,8 @@ void main(void)
             if( sensor_inp(MASK4_4)==0x1f ) {
                 /* Right crank determined -> to right crank clearing processing */
                 led_out( 0x2 );
-                handle( 38 );
-                motor( 50 ,10 );
+                handle( 45 );
+                motor( 45 ,7 );
                 pattern = 41;
                 uart_str("rightTo41.");
                 cnt1 = 0;
@@ -341,7 +343,7 @@ void main(void)
 
         case 31:
             /* Left crank clearing processing ? wait until stable */
-            if( cnt1 > 200 ) {
+            if( cnt1 > 150 ) {
                 pattern = 32;
                 cnt1 = 0;
             }
@@ -358,7 +360,7 @@ void main(void)
 
         case 41:
             /* Right crank clearing processing ? wait until stable */
-            if( cnt1 > 200 ) {
+            if( cnt1 > 150 ) {
                 pattern = 42;
                 cnt1 = 0;
             }
@@ -379,13 +381,18 @@ void main(void)
             led_out( 0x2 );
             handle( 0 );
             motor( 0 ,0 );
+            if( check_crossline() ) {   /* Cross line check            */
+                        	uart_str("Check Crossline.");
+                        	pattern = 21;
+                            break;
+                        }
             pattern = 52;
             cnt1 = 0;
             break;
 
         case 52:
             /* Read but ignore 2nd time */
-            if( cnt1 > 100 ){
+            if( cnt1 > 50 ){
                 pattern = 53;
                 cnt1 = 0;
             }
@@ -442,6 +449,11 @@ void main(void)
             led_out( 0x1 );
             handle( 0 );
             motor( 0 ,0 );
+            if( check_crossline() ) {   /* Cross line check            */
+                        	uart_str("Check Crossline.");
+                        	pattern = 21;
+                            break;
+                        }
             pattern = 62;
             cnt1 = 0;
             break;
@@ -449,7 +461,7 @@ void main(void)
         case 62:
         	uart_str("Case 62.");
             /* Read but ignore 2nd time */
-            if( cnt1 > 80 ){
+            if( cnt1 > 50 ){
                 pattern = 63;
                 cnt1 = 0;
             }
@@ -468,16 +480,16 @@ void main(void)
             switch( sensor_inp(MASK3_3) ) {
                 case 0x00:
                     /* Center -> straight */
-                    handle( -10 );
-                    motor( 31 ,40 );
+                    handle( 0 );
+                    motor( 40 ,40 );
                     break;
                 case 0x04:
                 case 0x06:
                 case 0x07:
                 case 0x03:
-                    /* Left of center -> turn to right */
-                    handle( -10 );
-                    motor( 31 ,40 );
+                    /* Left of center -> turn to right - update: nicht nach rechts korrgieren */
+                    handle( 0 );
+                    motor( 40 ,40 );
                     break;
                 case 0x20:
                 case 0x60:
@@ -803,4 +815,3 @@ void handle( int angle )
 /***********************************************************************/
 /* end of file                                                         */
 /***********************************************************************/
-
