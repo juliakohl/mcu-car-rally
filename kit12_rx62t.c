@@ -161,12 +161,24 @@ void main(void)
 
             switch( sensor_inp(MASK3_3) ) {
                 case 0x00:
+                	if(cnt1 > 1000 && cnt1 < 5000){
+                	                		handle( 0 );
+                	                		motor( 70 ,70 );
+                	                		uart_str("slow-straight.");
+                	                		break;
+                	                	}
                     /* Center -> straight */
                     handle( 0 );
-                    motor( 100 ,100 );
+                    motor( 90 ,90 );
                     break;
 
                 case 0x04:
+                	if(cnt1 > 1500 && cnt1 < 5000){
+                		handle( 5 );
+                		motor( 80 ,75 );
+                		uart_str("slow-slight.");
+                		break;
+                	}
                     /* Slight amount left of center -> slight turn to right */
                     handle( 5 );
                     motor( 100 ,92 );
@@ -180,21 +192,40 @@ void main(void)
 
                 case 0x07:
                     /* Medium amount left of center -> medium turn to right */
+                	/*if(cnt1 < 3000){
+                		handle( 25 );
+                		motor( 25 ,16 );
+                		uart_str("slow medium.");
+                		break;
+                	}*/
                     handle( 25 );
                     motor( 45 ,28 );
+                    cnt1=0;
                     uart_str("medium amount left of center.");
                     break;
 
                 case 0x03:
+                	/*if(cnt1 < 3000){
+                	                		handle( 30 );
+                	                		motor( 25 ,14 );
+                	                		uart_str("slow large.");
+                	                		break;
+                	                	}*/
                     /* Large amount left of center -> large turn to right */
                     handle( 30 );
                     motor( 40 ,22 );
-
+                    cnt1=0;
                     //pattern = 12;
                     uart_str("large amount left of center.");
                     break;
 
                 case 0x20:
+                	if(cnt1 > 1000 && cnt1 < 5000){
+                		handle( -5 );
+                		motor( 75 ,80 );
+                		uart_str("slow-slight.");
+                		break;
+                	}
                     /* Slight amount right of center -> slight turn to left */
                     handle( -5 );
                     motor( 92 ,100 );
@@ -208,16 +239,30 @@ void main(void)
 
                 case 0xe0:
                     /* Medium amount right of center -> medium turn to left */
+                	/*if(cnt1 < 3000){
+                	                		handle( -25 );
+                	                		motor( 16, 25 );
+                	                		uart_str("slow medium.");
+                	                		break;
+                	                	}*/
                     handle( -25 );
                     motor( 28 ,45 );
+                    cnt1=0;
                     uart_str("medium amount right of center.");
                     break;
 
                 case 0xc0:
                     /* Large amount right of center -> large turn to left */
+                	/*if(cnt1 < 3000){
+                	                		handle( -30 );
+                	                		motor( 14, 25 );
+                	                		uart_str("slow large.");
+                	                		break;
+                	                	}*/
                     handle( -30 );
                     motor( 22 ,40 );
                     //pattern = 13;
+                    cnt1=0;
                     uart_str("large amount right of center.");
                     break;
 
@@ -247,7 +292,7 @@ void main(void)
             if( sensor_inp(MASK3_3) == 0x06 ) {
             	uart_str("from12to11.");
                 pattern = 11;
-
+                cnt1 = 0;
             }
             break;
 
@@ -269,6 +314,7 @@ void main(void)
             if( sensor_inp(MASK3_3) == 0x60 ) {
             	uart_str("from13to11.");
                 pattern = 11;
+                cnt1 = 0;
             }
             break;
 
@@ -278,7 +324,7 @@ void main(void)
             /* Processing at 1st cross line */
             led_out( 0x3 );
             handle( 0 );
-            motor( 0 ,0 );
+            motor( 15 ,15 );
             pattern = 22;
             cnt1 = 0;
             break;
@@ -286,7 +332,7 @@ void main(void)
         case 22:
         	uart_str("22.");
             /* Read but ignore 2nd line */
-            if( cnt1 > 50 ){ // UPDATE 25.22. timer kürzer
+            if( cnt1 > 400 ){ // UPDATE 25.22. timer kürzer
                 pattern = 23;
                 cnt1 = 0;
             }
@@ -295,21 +341,21 @@ void main(void)
         case 23:
         	uart_str("23.");
             /* Trace, crank detection after cross line */
-            if( sensor_inp(MASK4_4)==0xf8 ) {
+            if( sensor_inp(MASK4_4)==0xf8 || sensor_inp(MASK4_4)==0xfc || sensor_inp(MASK4_4)==0xf0 ) {
                 /* Left crank determined -> to left crank clearing processing */
                 led_out( 0x1 );
-                handle( -45 );
-                motor( 7 ,45 );
+                handle( -42 );
+                motor( 7 ,60 );
                 pattern = 31;
                 uart_str("leftTo31.");
                 cnt1 = 0;
                 break;
             }
-            if( sensor_inp(MASK4_4)==0x1f ) {
+            if( sensor_inp(MASK4_4)==0x0f || sensor_inp(MASK4_4)==0x1f || sensor_inp(MASK4_4)==0x3f) {
                 /* Right crank determined -> to right crank clearing processing */
                 led_out( 0x2 );
-                handle( 45 );
-                motor( 45 ,7 );
+                handle( 42 );
+                motor( 60 ,7 );
                 pattern = 41;
                 uart_str("rightTo41.");
                 cnt1 = 0;
@@ -317,33 +363,69 @@ void main(void)
             }
             switch( sensor_inp(MASK3_3) ) {
                 case 0x00:
+                    if( cnt1 < 200 ){ // UPDATE 25.22. timer kürzer
+                    	uart_str("goStraightFast0x00.");
+                        handle( 0 );
+                        motor( 50 ,50 );
+                        break;
+                    }
                     /* Center -> straight */
+                    if( cnt1 < 300 ){ // UPDATE 25.22. timer kürzer
+                    	uart_str("goStraightSlow0x00.");
+                        handle( 0 );
+                        motor( 5 ,5 );
+                        break;
+                    }
                 	uart_str("goStraight0x00.");
                     handle( 0 );
-                    motor( 10 ,10 );
+                    motor( 35 ,35 );
                     break;
                 case 0x04:
                 case 0x06:
                 case 0x07:
                 case 0x03:
+                    if( cnt1 < 200 ){ // UPDATE 25.22. timer kürzer
+                    	uart_str("goRightishFast0x00.");
+                        handle( 8 );
+                        motor( 50 ,50 );
+                        break;
+                    }
+                    if( cnt1 < 300 ){ // UPDATE 25.22. timer kürzer
+                    	uart_str("goRightishSlow0x00.");
+                        handle( 8 );
+                        motor( 5 ,5 );
+                        break;
+                    }
                     /* Left of center -> turn to right */
                     handle( 8 );
-                    motor( 10 ,9 );
+                    motor( 30 ,30 );
                     break;
                 case 0x20:
                 case 0x60:
                 case 0xe0:
                 case 0xc0:
+                    if( cnt1 < 200 ){ // UPDATE 25.22. timer kürzer
+                    	uart_str("goLeftishFast0x00.");
+                        handle( -8 );
+                        motor( 50 ,50 );
+                        break;
+                    }
+                    if( cnt1 < 300 ){ // UPDATE 25.22. timer kürzer
+                    	uart_str("goLeftishSlow0x00.");
+                        handle( -8 );
+                        motor( 5 ,5 );
+                        break;
+                    }
                     /* Right of center -> turn to left */
                     handle( -8 );
-                    motor( 9 ,10 );
+                    motor( 30 ,30 );
                     break;
             }
             break;
 
         case 31:
             /* Left crank clearing processing ? wait until stable */
-            if( cnt1 > 150 ) {
+            if( cnt1 > 300 ) {
                 pattern = 32;
                 cnt1 = 0;
             }
@@ -360,7 +442,7 @@ void main(void)
 
         case 41:
             /* Right crank clearing processing ? wait until stable */
-            if( cnt1 > 150 ) {
+            if( cnt1 > 300 ) {
                 pattern = 42;
                 cnt1 = 0;
             }
@@ -381,28 +463,43 @@ void main(void)
             led_out( 0x2 );
             handle( 0 );
             motor( 0 ,0 );
-            if( check_crossline() ) {   /* Cross line check            */
-                        	uart_str("Check Crossline.");
-                        	pattern = 21;
+            if( cnt1 < 150 ){
+                        	if( check_crossline() ) {
+                        		/* Cross line check            */
+                        		uart_str("Check Crossline.");
+                        		pattern = 21;
+                        		cnt1=0;
+                        		break;
+                        	}else{
+                        		break;
+                        	}
+                        }else{
+                            pattern = 52;
+                            cnt1 = 0;
                             break;
                         }
-            pattern = 52;
-            cnt1 = 0;
-            break;
 
         case 52:
+        	uart_str("Case 52.");
+        	if( check_crossline() ) {
+        	                        		/* Cross line check            */
+        	                        		uart_str("Check Crossline.");
+        	                        		pattern = 21;
+        	                        		cnt1=0;
+        	                        		break;
+        	                        	}
             /* Read but ignore 2nd time */
-            if( cnt1 > 50 ){
-                pattern = 53;
-                cnt1 = 0;
-            }
+
+            pattern = 53;
+            cnt1 = 0;
+
             break;
 
         case 53:
             /* Trace, lane change after right half line detection */
             if( sensor_inp(MASK4_4) == 0x00 ) {
                 handle( 15 );
-                motor( 40 ,31 );
+                motor( 65 ,46 );
                 pattern = 54;
                 cnt1 = 0;
                 break;
@@ -449,22 +546,29 @@ void main(void)
             led_out( 0x1 );
             handle( 0 );
             motor( 0 ,0 );
-            if( check_crossline() ) {   /* Cross line check            */
-                        	uart_str("Check Crossline.");
-                        	pattern = 21;
-                            break;
-                        }
-            pattern = 62;
-            cnt1 = 0;
-            break;
+
+            if( cnt1 < 150 ){
+            	if( check_crossline() ) {
+            		/* Cross line check            */
+            		uart_str("Crossline.");
+            		pattern = 21;
+            		cnt1=0;
+            		break;
+            	}else{
+            		break;
+            	}
+            }else{
+                pattern = 62;
+                cnt1 = 0;
+                break;
+            }
 
         case 62:
         	uart_str("Case 62.");
             /* Read but ignore 2nd time */
-            if( cnt1 > 50 ){
-                pattern = 63;
-                cnt1 = 0;
-            }
+            pattern = 63;
+            cnt1 = 0;
+
             break;
 
         case 63:
@@ -472,7 +576,7 @@ void main(void)
             /* Trace, lane change after left half line detection */
             if( sensor_inp(MASK4_4) == 0x00 ) {
                 handle( -15 );
-                motor( 46 ,60 );
+                motor( 46 ,65 );
                 pattern = 64;
                 cnt1 = 0;
                 break;
@@ -673,12 +777,12 @@ int check_crossline( void )
 /***********************************************************************/
 int check_rightline( void )
 {
-    unsigned char b;
-    int ret;
+    unsigned char b = sensor_inp(MASK4_4);
+    int ret = 0;
 
-    ret = 0;
-    b = sensor_inp(MASK4_4);
-    if( b==0x1f ) {
+    cnt1 = 0;
+
+    if( b==0x1f || b==0x3f) {
         ret = 1;
     }
     return ret;
@@ -690,12 +794,12 @@ int check_rightline( void )
 /***********************************************************************/
 int check_leftline( void )
 {
-    unsigned char b;
-    int ret;
+	unsigned char b = sensor_inp(MASK4_4);
+	int ret = 0;
 
-    ret = 0;
-    b = sensor_inp(MASK4_4);
-    if( b==0xf8 ) {
+    cnt1 = 0;
+
+    if( b==0xf8 || b==0xfc ) {
         ret = 1;
     }
     return ret;
@@ -815,3 +919,4 @@ void handle( int angle )
 /***********************************************************************/
 /* end of file                                                         */
 /***********************************************************************/
+
