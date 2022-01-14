@@ -62,6 +62,7 @@ void handle( int angle );
 /*======================================*/
 unsigned long   cnt0;
 unsigned long   cnt1;
+unsigned long	cnt2;
 int             pattern;
 
 /***********************************************************************/
@@ -112,6 +113,7 @@ void main(void)
             if( pushsw_get() ) {
                 pattern = 1;
                 cnt1 = 0;
+                cnt2 = 0;
                 break;
             }
             if( cnt1 < 100 ) {          /* LED flashing processing     */
@@ -148,12 +150,12 @@ void main(void)
             	pattern = 21;
                 break;
             }
-            if( check_rightline() ) {   /* Right half line detection check */
+            if( check_rightline() && cnt2 > 1000 ) {   /* Right half line detection check */
             	uart_str("rightline.");
             	pattern = 51;
                 break;
             }
-            if( check_leftline() ) {    /* Left half line detection check */
+            if( check_leftline() && cnt2 > 1000  ) {    /* Left half line detection check */
             	uart_str("leftline.");
             	pattern = 61;
                 break;
@@ -161,30 +163,38 @@ void main(void)
 
             switch( sensor_inp(MASK3_3) ) {
                 case 0x00:
-                	if(cnt1 > 1000 && cnt1 < 5000){
+                	if(cnt2 > 3000 && cnt2 < 3500 ){
                 	                		handle( 0 );
                 	                		motor( 70 ,70 );
                 	                		uart_str("slow-straight.");
                 	                		break;
                 	                	}
                     /* Center -> straight */
+                	uart_str("normal-straight.");
                     handle( 0 );
-                    motor( 90 ,90 );
+                    motor( 100 ,100 );
                     break;
 
                 case 0x04:
-                	if(cnt1 > 1500 && cnt1 < 5000){
+                	if(cnt2 > 3000 && cnt2 < 3500 ){
                 		handle( 5 );
-                		motor( 80 ,75 );
+                		motor( 70 ,65 );
                 		uart_str("slow-slight.");
                 		break;
                 	}
+                	uart_str("normal-slight.");
                     /* Slight amount left of center -> slight turn to right */
                     handle( 5 );
                     motor( 100 ,92 );
                     break;
 
                 case 0x06:
+                	if(cnt2 > 3000 && cnt2 < 3500  ){
+                		handle( 15 );
+                		motor( 70 ,55 );
+                		uart_str("slow-small.");
+                		break;
+                	}
                     /* Small amount left of center -> small turn to right */
                     handle( 15 );
                     motor( 100 ,76 );
@@ -200,7 +210,7 @@ void main(void)
                 	}*/
                     handle( 25 );
                     motor( 45 ,28 );
-                    cnt1=0;
+
                     uart_str("medium amount left of center.");
                     break;
 
@@ -220,18 +230,25 @@ void main(void)
                     break;
 
                 case 0x20:
-                	if(cnt1 > 1000 && cnt1 < 5000){
+                	if(cnt2 > 3000 && cnt2 < 3500 ){
                 		handle( -5 );
-                		motor( 75 ,80 );
+                		motor( 60 ,70 );
                 		uart_str("slow-slight.");
                 		break;
                 	}
                     /* Slight amount right of center -> slight turn to left */
+                	uart_str("normal-slight.");
                     handle( -5 );
                     motor( 92 ,100 );
                     break;
 
                 case 0x60:
+                	if(cnt2 > 3000 && cnt2 < 3500 ){
+                		handle( -15 );
+                		motor( 55 ,70 );
+                		uart_str("slow-small.");
+                		break;
+                	}
                     /* Small amount right of center -> small turn to left */
                     handle( -15 );
                     motor( 76 ,100 );
@@ -247,7 +264,7 @@ void main(void)
                 	                	}*/
                     handle( -25 );
                     motor( 28 ,45 );
-                    cnt1=0;
+
                     uart_str("medium amount right of center.");
                     break;
 
@@ -327,6 +344,7 @@ void main(void)
             motor( 15 ,15 );
             pattern = 22;
             cnt1 = 0;
+            cnt2 =0;
             break;
 
         case 22:
@@ -359,6 +377,7 @@ void main(void)
                 pattern = 41;
                 uart_str("rightTo41.");
                 cnt1 = 0;
+                cnt2 = 0;
                 break;
             }
             switch( sensor_inp(MASK3_3) ) {
@@ -537,6 +556,7 @@ void main(void)
                 led_out( 0x0 );
                 pattern = 11;
                 cnt1 = 0;
+                cnt2=0;
             }
             break;
 
@@ -575,7 +595,7 @@ void main(void)
         	uart_str("Case 63.");
             /* Trace, lane change after left half line detection */
             if( sensor_inp(MASK4_4) == 0x00 ) {
-                handle( -15 );
+                handle( -18 );
                 motor( 46 ,65 );
                 pattern = 64;
                 cnt1 = 0;
@@ -614,6 +634,7 @@ void main(void)
                 led_out( 0x0 );
                 pattern = 11;
                 cnt1 = 0;
+                cnt2=0;
             }
             break;
 
@@ -712,6 +733,7 @@ void Excep_CMT0_CMI0(void)
 {
     cnt0++;
     cnt1++;
+    cnt2++;
 }
 
 /***********************************************************************/
