@@ -150,12 +150,12 @@ void main(void)
             	pattern = 21;
                 break;
             }
-            if( check_rightline() && cnt2 > 300 ) {   /* Right half line detection check */
+            if( check_rightline() && cnt2 > 150 ) {   /* Right half line detection check */
             	uart_str("rightline.");
             	pattern = 51;
                 break;
             }
-            if( check_leftline() && cnt2 > 300  ) {    /* Left half line detection check */
+            if( check_leftline() && cnt2 > 150  ) {    /* Left half line detection check */
             	uart_str("leftline.");
             	pattern = 61;
                 break;
@@ -163,7 +163,7 @@ void main(void)
 
             switch( sensor_inp(MASK3_3) ) {
                 case 0x00:
-                	if(cnt2 > 3700 && cnt2 < 5000 ){
+                	if(cnt2 > 3200 && cnt2 < 5000 ){
                 	                		handle( 0 );
                 	                		motor( 30 ,30 );
                 	                		uart_str("slow.");
@@ -172,11 +172,11 @@ void main(void)
                     /* Center -> straight */
                 	uart_str("normal.");
                     handle( 0 );
-                    motor( 90 ,90 );
+                    motor( 95 ,95 );
                     break;
 
                 case 0x04:
-                	if(cnt2 > 4000 && cnt2 < 5000 ){
+                	if(cnt2 > 32000 && cnt2 < 5000 ){
                 		handle( 5 );
                 		motor( 50 ,46 );
                 		uart_str("slow.");
@@ -185,11 +185,11 @@ void main(void)
                 	uart_str("normal.");
                     /* Slight amount left of center -> slight turn to right */
                     handle( 5 );
-                    motor( 100 ,92 );
+                    motor( 90 ,82 );
                     break;
 
                 case 0x06:
-                	if(cnt2 > 4000 && cnt2 < 5000  ){
+                	if(cnt2 > 3200 && cnt2 < 5000  ){
                 		handle( 15 );
                 		motor( 50 ,38 );
                 		uart_str("slow.");
@@ -197,7 +197,7 @@ void main(void)
                 	}
                     /* Small amount left of center -> small turn to right */
                     handle( 15 );
-                    motor( 90 ,69 );
+                    motor( 60 ,46 );
                     break;
 
                 case 0x07:
@@ -215,7 +215,7 @@ void main(void)
                     break;
 
                 case 0x20:
-                	if(cnt2 > 4000 && cnt2 < 5000 ){
+                	if(cnt2 > 3200 && cnt2 < 5000 ){
                 		handle( -5 );
                 		motor( 46 ,50 );
                 		uart_str("slow.");
@@ -224,11 +224,11 @@ void main(void)
                     /* Slight amount right of center -> slight turn to left */
                 	uart_str("normal.");
                     handle( -5 );
-                    motor( 92 ,100 );
+                    motor( 82 ,90 );
                     break;
 
                 case 0x60:
-                	if(cnt2 > 4000 && cnt2 < 5000 ){
+                	if(cnt2 > 3200 && cnt2 < 5000 ){
                 		handle( -15 );
                 		motor( 38 ,50 );
                 		uart_str("slow.");
@@ -236,7 +236,7 @@ void main(void)
                 	}
                     /* Small amount right of center -> small turn to left */
                     handle( -15 );
-                    motor( 69 ,90 );
+                    motor( 46 ,60 );
                     break;
 
                 case 0xe0:
